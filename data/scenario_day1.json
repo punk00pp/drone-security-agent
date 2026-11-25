@@ -1,0 +1,167 @@
+{
+  "scenario_name": "Day 1 \u00e2\u20ac\u201d Full Feature Exercise",
+  "description": "A 24-hour patrol scenario that exercises every pipeline feature: loitering detection, vehicle tracking, perimeter breach, after-hours alert, false-positive control, and noisy/ambiguous descriptions.",
+  "date": "2024-01-15",
+  "frames": [
+    {
+      "frame_id": 1,
+      "time": "00:00",
+      "location": "Main Gate",
+      "altitude_m": 20.0,
+      "description": "Empty driveway, gate closed. No activity detected.",
+      "expected": "log only"
+    },
+    {
+      "frame_id": 2,
+      "time": "00:01",
+      "location": "Main Gate",
+      "altitude_m": 20.5,
+      "description": "Person standing near the gate, partially obscured by shadow.",
+      "expected": "log \u00e2\u20ac\u201d loitering count 1"
+    },
+    {
+      "frame_id": 3,
+      "time": "00:02",
+      "location": "Main Gate",
+      "altitude_m": 21.0,
+      "description": "Person still standing near gate, looking around, appears to be waiting.",
+      "expected": "log \u00e2\u20ac\u201d loitering count 2"
+    },
+    {
+      "frame_id": 4,
+      "time": "00:04",
+      "location": "Main Gate",
+      "altitude_m": 21.0,
+      "description": "Person standing near gate, has not moved from previous frames.",
+      "expected": "ALERT: loitering warning (3+ night frames)"
+    },
+    {
+      "frame_id": 5,
+      "time": "06:15",
+      "location": "Main Gate",
+      "altitude_m": 25.0,
+      "description": "Morning delivery truck parked outside the gate briefly, driver visible.",
+      "expected": "log \u00e2\u20ac\u201d vehicle (morning, within allowed hours, no alert)"
+    },
+    {
+      "frame_id": 6,
+      "time": "08:30",
+      "location": "Main Gate",
+      "altitude_m": 30.0,
+      "description": "Blue Ford F150 entering the main gate, moving slowly.",
+      "expected": "log \u00e2\u20ac\u201d entity truck#1 entry_count=1"
+    },
+    {
+      "frame_id": 7,
+      "time": "08:31",
+      "location": "Garage",
+      "altitude_m": 28.0,
+      "description": "Blue Ford F150 parked at garage, engine off, driver stepped out.",
+      "expected": "log"
+    },
+    {
+      "frame_id": 8,
+      "time": "09:45",
+      "location": "Main Gate",
+      "altitude_m": 22.0,
+      "description": "Something large near the gate, hard to make out from this altitude.",
+      "expected": "log \u00e2\u20ac\u201d ambiguous frame, analyzer robustness test"
+    },
+    {
+      "frame_id": 9,
+      "time": "11:00",
+      "location": "Perimeter North",
+      "altitude_m": 35.0,
+      "description": "A pickup truck parked along the north perimeter fence, unattended.",
+      "expected": "log \u00e2\u20ac\u201d 'pickup' maps to vehicle/truck (variant phrasing test)"
+    },
+    {
+      "frame_id": 10,
+      "time": "12:00",
+      "location": "Garage",
+      "altitude_m": 28.0,
+      "description": "Blue Ford F150 still parked at garage, no movement. Driveway clear.",
+      "expected": "log \u00e2\u20ac\u201d 'Blue Ford F150 spotted at garage, 12:00.'"
+    },
+    {
+      "frame_id": 11,
+      "time": "13:30",
+      "location": "Main Gate",
+      "altitude_m": 20.0,
+      "description": "F-150 pickup visible near the main gate, appears to be moving.",
+      "expected": "log \u00e2\u20ac\u201d 'F-150' variant phrasing test"
+    },
+    {
+      "frame_id": 12,
+      "time": "14:00",
+      "location": "Driveway",
+      "altitude_m": 18.0,
+      "description": "Person walking along the driveway toward the building, carrying a bag.",
+      "expected": "log \u00e2\u20ac\u201d daytime person, no alert"
+    },
+    {
+      "frame_id": 13,
+      "time": "15:00",
+      "location": "Main Gate",
+      "altitude_m": 22.0,
+      "description": "Blue Ford F150 leaving through main gate, driver waving.",
+      "expected": "log \u00e2\u20ac\u201d entity truck#1 exit_count=1"
+    },
+    {
+      "frame_id": 14,
+      "time": "16:30",
+      "location": "Parking Lot",
+      "altitude_m": 25.0,
+      "description": "Silver Toyota Camry parked in the lot. No suspicious activity.",
+      "expected": "log \u00e2\u20ac\u201d known vehicle, no alert"
+    },
+    {
+      "frame_id": 15,
+      "time": "17:45",
+      "location": "Main Gate",
+      "altitude_m": 30.0,
+      "description": "Blue Ford F150 entering gate again, same truck as this morning.",
+      "expected": "ALERT: repeated entry \u00e2\u20ac\u201d truck#1 entry_count=2 (entered twice today)"
+    },
+    {
+      "frame_id": 16,
+      "time": "19:00",
+      "location": "Side Entrance",
+      "altitude_m": 15.0,
+      "description": "Unknown sedan parked at the side entrance. Make and model unclear.",
+      "expected": "log + INFO alert: unknown vehicle"
+    },
+    {
+      "frame_id": 17,
+      "time": "21:00",
+      "location": "Back Fence",
+      "altitude_m": 15.0,
+      "description": "Unknown person climbing over the back fence, moving quickly.",
+      "expected": "ALERT: critical perimeter breach"
+    },
+    {
+      "frame_id": 18,
+      "time": "22:30",
+      "location": "Perimeter North",
+      "altitude_m": 12.0,
+      "description": "Person running along the north perimeter, heading toward the garage.",
+      "expected": "ALERT: loitering/suspicious person at night"
+    },
+    {
+      "frame_id": 19,
+      "time": "23:30",
+      "location": "Garage",
+      "altitude_m": 18.0,
+      "description": "Delivery van parked at garage with rear door open, no driver visible.",
+      "expected": "ALERT: after-hours vehicle warning"
+    },
+    {
+      "frame_id": 20,
+      "time": "23:50",
+      "location": "Main Gate",
+      "altitude_m": 20.0,
+      "description": "Cat walking across the driveway near the main gate. No other activity.",
+      "expected": "log \u00e2\u20ac\u201d animal, NO alert (false-positive control); also LOW BATTERY alert"
+    }
+  ]
+}

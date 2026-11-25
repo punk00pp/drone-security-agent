@@ -1,0 +1,167 @@
+{
+  "scenario_name": "Day 3 — Residential Property Night Incident",
+  "description": "Overnight patrol of a residential compound. Tests multiple simultaneous intruders, vehicle tailgating, animal false-positives, and a coordinated entry attempt across two perimeter points.",
+  "date": "2024-03-10",
+  "frames": [
+    {
+      "frame_id": 1,
+      "time": "22:00",
+      "location": "Front Gate",
+      "altitude_m": 18.0,
+      "description": "Front gate closed. Street is empty. Streetlights on.",
+      "expected": "log only"
+    },
+    {
+      "frame_id": 2,
+      "time": "22:10",
+      "location": "Front Gate",
+      "altitude_m": 18.5,
+      "description": "White Toyota Camry parked outside the front gate, engine running, no occupants visible.",
+      "expected": "ALERT: after-hours vehicle warning"
+    },
+    {
+      "frame_id": 3,
+      "time": "22:11",
+      "location": "Front Gate",
+      "altitude_m": 18.5,
+      "description": "White Toyota Camry still parked outside gate. A person steps out from the driver side.",
+      "expected": "log — person + vehicle entity update"
+    },
+    {
+      "frame_id": 4,
+      "time": "22:13",
+      "location": "Front Gate",
+      "altitude_m": 19.0,
+      "description": "Person standing beside the Toyota Camry, looking toward the gate, not moving.",
+      "expected": "log — loitering count 1 (night)"
+    },
+    {
+      "frame_id": 5,
+      "time": "22:15",
+      "location": "Front Gate",
+      "altitude_m": 19.0,
+      "description": "Same person still standing beside the vehicle near the front gate, checking their phone.",
+      "expected": "log — loitering count 2"
+    },
+    {
+      "frame_id": 6,
+      "time": "22:17",
+      "location": "Front Gate",
+      "altitude_m": 19.0,
+      "description": "Person has not moved. Still standing near gate beside the parked Toyota Camry.",
+      "expected": "ALERT: loitering warning (3+ night frames)"
+    },
+    {
+      "frame_id": 7,
+      "time": "22:30",
+      "location": "East Wall",
+      "altitude_m": 14.0,
+      "description": "Two individuals approaching the east boundary wall from outside. Both moving cautiously.",
+      "expected": "log — two persons detected, night time"
+    },
+    {
+      "frame_id": 8,
+      "time": "22:32",
+      "location": "East Wall",
+      "altitude_m": 14.0,
+      "description": "One person climbing over the east boundary wall while the other keeps watch below.",
+      "expected": "ALERT: critical perimeter breach"
+    },
+    {
+      "frame_id": 9,
+      "time": "22:33",
+      "location": "East Wall",
+      "altitude_m": 14.0,
+      "description": "Second person now also climbing over the east boundary wall.",
+      "expected": "ALERT: critical perimeter breach (second individual)"
+    },
+    {
+      "frame_id": 10,
+      "time": "22:35",
+      "location": "Garden",
+      "altitude_m": 12.0,
+      "description": "Two persons moving quickly across the garden toward the main building.",
+      "expected": "log — intruders tracked inside compound"
+    },
+    {
+      "frame_id": 11,
+      "time": "23:00",
+      "location": "Driveway",
+      "altitude_m": 16.0,
+      "description": "Fox walking slowly along the driveway near the parked vehicles. No humans visible.",
+      "expected": "log — animal, NO alert (false-positive control)"
+    },
+    {
+      "frame_id": 12,
+      "time": "23:15",
+      "location": "Front Gate",
+      "altitude_m": 18.0,
+      "description": "White Toyota Camry still parked outside the gate. No occupants visible now.",
+      "expected": "log — vehicle entity still tracked"
+    },
+    {
+      "frame_id": 13,
+      "time": "23:30",
+      "location": "Front Gate",
+      "altitude_m": 18.0,
+      "description": "White Toyota Camry exits, turning left onto the street. Gate remains closed.",
+      "expected": "log — vehicle exit, entity exit_count=1"
+    },
+    {
+      "frame_id": 14,
+      "time": "23:45",
+      "location": "Service Lane",
+      "altitude_m": 20.0,
+      "description": "An unfamiliar black sedan parked in the service lane. Lights off, no driver.",
+      "expected": "log + INFO alert: unknown vehicle after hours"
+    },
+    {
+      "frame_id": 15,
+      "time": "00:10",
+      "location": "Rear Fence",
+      "altitude_m": 13.0,
+      "description": "Person jumping over the rear fence and landing inside the compound.",
+      "expected": "ALERT: critical perimeter breach"
+    },
+    {
+      "frame_id": 16,
+      "time": "00:12",
+      "location": "Rear Fence",
+      "altitude_m": 13.0,
+      "description": "Second person climbing over the rear fence. Both individuals now inside.",
+      "expected": "ALERT: critical perimeter breach (second individual)"
+    },
+    {
+      "frame_id": 17,
+      "time": "00:30",
+      "location": "Parking Area",
+      "altitude_m": 15.0,
+      "description": "Silver Honda Civic parked in the resident parking area. No suspicious activity observed.",
+      "expected": "log — known vehicle type, no alert"
+    },
+    {
+      "frame_id": 18,
+      "time": "01:00",
+      "location": "Front Gate",
+      "altitude_m": 18.0,
+      "description": "White Toyota Camry returning and parking outside the front gate again.",
+      "expected": "ALERT: repeated entry — Toyota Camry entry_count=2; after-hours vehicle"
+    },
+    {
+      "frame_id": 19,
+      "time": "02:30",
+      "location": "East Wall",
+      "altitude_m": 14.0,
+      "description": "Stray cat sitting on top of the east boundary wall. No human activity nearby.",
+      "expected": "log — animal, NO perimeter breach alert (false-positive control)"
+    },
+    {
+      "frame_id": 20,
+      "time": "04:00",
+      "location": "Front Gate",
+      "altitude_m": 18.0,
+      "description": "Quiet early morning. Front gate closed. No activity detected anywhere.",
+      "expected": "log only"
+    }
+  ]
+}

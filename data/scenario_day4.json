@@ -1,0 +1,167 @@
+{
+  "scenario_name": "Day 4 — Commercial Campus Day Shift",
+  "description": "Daytime patrol of a commercial office campus. Tests altitude anomaly, daytime vehicle tracking, variant phrasing, ambiguous descriptions, a lunchtime crowd, an unauthorized restricted-zone entry, and an end-of-day tailgating attempt.",
+  "date": "2024-04-05",
+  "frames": [
+    {
+      "frame_id": 1,
+      "time": "07:00",
+      "location": "Main Entrance",
+      "altitude_m": 25.0,
+      "description": "Main entrance clear. Security guard at the booth. Barrier is down.",
+      "expected": "log only"
+    },
+    {
+      "frame_id": 2,
+      "time": "07:45",
+      "location": "Main Entrance",
+      "altitude_m": 25.0,
+      "description": "Black Maruti Suzuki Swift entering campus through the main entrance.",
+      "expected": "log — entity car#1 entry_count=1"
+    },
+    {
+      "frame_id": 3,
+      "time": "08:00",
+      "location": "Visitor Parking",
+      "altitude_m": 22.0,
+      "description": "Swift parked in visitor parking. Driver, a woman in formal attire, walks toward the building.",
+      "expected": "log — vehicle parked, person detected (daytime, no alert)"
+    },
+    {
+      "frame_id": 4,
+      "time": "08:30",
+      "location": "Main Entrance",
+      "altitude_m": 160.0,
+      "description": "White Honda Civic entering campus. Altitude unusually high due to wind drift.",
+      "expected": "ALERT: altitude anomaly (above 120m threshold)"
+    },
+    {
+      "frame_id": 5,
+      "time": "09:15",
+      "location": "Main Entrance",
+      "altitude_m": 25.0,
+      "description": "A pickup truck entering campus, make unclear from this angle.",
+      "expected": "log — variant phrasing pickup maps to truck subtype"
+    },
+    {
+      "frame_id": 6,
+      "time": "10:00",
+      "location": "Restricted Zone",
+      "altitude_m": 20.0,
+      "description": "An individual in casual clothing walking past the restricted zone barrier and entering the zone.",
+      "expected": "log — person at restricted zone (daytime, no loitering alert but stateful tracking)"
+    },
+    {
+      "frame_id": 7,
+      "time": "10:30",
+      "location": "Server Room Entrance",
+      "altitude_m": 15.0,
+      "description": "Something moving near the server room entrance. Hard to determine if it is a person or equipment being moved.",
+      "expected": "log — ambiguous frame, analyzer robustness test"
+    },
+    {
+      "frame_id": 8,
+      "time": "12:00",
+      "location": "Courtyard",
+      "altitude_m": 28.0,
+      "description": "Several employees gathered in the courtyard during lunch break. No suspicious activity.",
+      "expected": "log — multiple persons, daytime, no alert"
+    },
+    {
+      "frame_id": 9,
+      "time": "12:30",
+      "location": "Visitor Parking",
+      "altitude_m": 22.0,
+      "description": "Grey SUV parked in visitor parking. Make and registration unclear from altitude.",
+      "expected": "log + INFO alert: unknown vehicle"
+    },
+    {
+      "frame_id": 10,
+      "time": "13:00",
+      "location": "Main Entrance",
+      "altitude_m": 25.0,
+      "description": "F-150 truck exiting campus through the main entrance.",
+      "expected": "log — variant F-150 phrasing test"
+    },
+    {
+      "frame_id": 11,
+      "time": "14:15",
+      "location": "Rooftop Access",
+      "altitude_m": 10.0,
+      "description": "A person climbing up the external fire escape ladder toward the rooftop access door.",
+      "expected": "ALERT: critical perimeter breach — climbing activity"
+    },
+    {
+      "frame_id": 12,
+      "time": "15:00",
+      "location": "Visitor Parking",
+      "altitude_m": 22.0,
+      "description": "Black Maruti Swift still parked in visitor parking area. No activity around it.",
+      "expected": "log — existing entity vehicle#1 still on premises"
+    },
+    {
+      "frame_id": 13,
+      "time": "16:00",
+      "location": "Main Entrance",
+      "altitude_m": 25.0,
+      "description": "Several cars leaving campus in quick succession as day shift ends.",
+      "expected": "log — end of day activity, multiple vehicles"
+    },
+    {
+      "frame_id": 14,
+      "time": "17:30",
+      "location": "Main Entrance",
+      "altitude_m": 25.0,
+      "description": "Black Maruti Suzuki Swift exiting through the main entrance.",
+      "expected": "log — entity car#1 exit_count=1"
+    },
+    {
+      "frame_id": 15,
+      "time": "18:00",
+      "location": "Main Entrance",
+      "altitude_m": 25.0,
+      "description": "Black Maruti Swift re-entering campus immediately after exiting — possible tailgating attempt.",
+      "expected": "ALERT: repeated entry — car#1 entry_count=2"
+    },
+    {
+      "frame_id": 16,
+      "time": "19:00",
+      "location": "Rear Gate",
+      "altitude_m": 18.0,
+      "description": "White delivery van parked at the rear gate. Rear doors open, two people unloading boxes.",
+      "expected": "log — after-hours borderline (19:00 within 06-22 window, no alert)"
+    },
+    {
+      "frame_id": 17,
+      "time": "20:30",
+      "location": "Courtyard",
+      "altitude_m": 25.0,
+      "description": "Pigeons roosting on the courtyard benches. No human activity visible.",
+      "expected": "log — animal, NO alert (false-positive control)"
+    },
+    {
+      "frame_id": 18,
+      "time": "22:15",
+      "location": "Rear Gate",
+      "altitude_m": 18.0,
+      "description": "White van still parked at rear gate with doors open. No personnel visible now.",
+      "expected": "ALERT: after-hours vehicle warning (past 22:00)"
+    },
+    {
+      "frame_id": 19,
+      "time": "23:00",
+      "location": "Main Entrance",
+      "altitude_m": 3.0,
+      "description": "Drone flying very low over the main entrance during routine perimeter check.",
+      "expected": "ALERT: altitude anomaly (below 5m threshold)"
+    },
+    {
+      "frame_id": 20,
+      "time": "23:30",
+      "location": "Rooftop Access",
+      "altitude_m": 20.0,
+      "description": "Quiet rooftop. Access door appears closed. No personnel detected.",
+      "expected": "log only"
+    }
+  ]
+}

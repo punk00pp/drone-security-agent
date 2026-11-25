@@ -1,0 +1,167 @@
+{
+  "scenario_name": "Day 2 \u00e2\u20ac\u201d Industrial Facility Security Exercise",
+  "description": "A 24-hour autonomous drone patrol scenario at an industrial facility. Tests loitering detection, vehicle tracking, restricted zone intrusion, perimeter breaches, after-hours activity, ambiguous object descriptions, false-positive control, and low battery warnings.",
+  "date": "2024-02-20",
+  "frames": [
+    {
+      "frame_id": 1,
+      "time": "00:00",
+      "location": "Warehouse Entrance",
+      "altitude_m": 22.0,
+      "description": "Warehouse entrance is empty. Security lights are operational and all doors are closed.",
+      "expected": "log only"
+    },
+    {
+      "frame_id": 2,
+      "time": "00:15",
+      "location": "Warehouse Entrance",
+      "altitude_m": 22.5,
+      "description": "An unidentified person standing near the warehouse entrance, partially hidden behind a pillar.",
+      "expected": "log \u00e2\u20ac\u201d potential loitering count 1"
+    },
+    {
+      "frame_id": 3,
+      "time": "00:17",
+      "location": "Warehouse Entrance",
+      "altitude_m": 23.0,
+      "description": "Same individual remains near the entrance, looking toward the warehouse windows.",
+      "expected": "log \u00e2\u20ac\u201d loitering count 2"
+    },
+    {
+      "frame_id": 4,
+      "time": "00:20",
+      "location": "Warehouse Entrance",
+      "altitude_m": 23.0,
+      "description": "Person continues standing in approximately the same position without any visible activity.",
+      "expected": "ALERT: nighttime loitering warning"
+    },
+    {
+      "frame_id": 5,
+      "time": "05:45",
+      "location": "Loading Dock",
+      "altitude_m": 27.0,
+      "description": "White delivery truck approaching the loading dock. Two workers are waiting nearby.",
+      "expected": "log \u00e2\u20ac\u201d morning vehicle activity, no after-hours alert"
+    },
+    {
+      "frame_id": 6,
+      "time": "07:30",
+      "location": "Main Entrance",
+      "altitude_m": 30.0,
+      "description": "Red Mahindra Bolero entering the facility through the main entrance.",
+      "expected": "log \u00e2\u20ac\u201d entity vehicle#1 entry_count=1"
+    },
+    {
+      "frame_id": 7,
+      "time": "07:35",
+      "location": "Employee Parking",
+      "altitude_m": 26.0,
+      "description": "Red Mahindra Bolero parked in employee parking area. Driver exits the vehicle.",
+      "expected": "log \u00e2\u20ac\u201d track vehicle#1"
+    },
+    {
+      "frame_id": 8,
+      "time": "09:00",
+      "location": "Storage Yard",
+      "altitude_m": 35.0,
+      "description": "Large unidentified object visible behind stacked industrial containers. Details are unclear.",
+      "expected": "log \u00e2\u20ac\u201d ambiguous observation, analyzer robustness test"
+    },
+    {
+      "frame_id": 9,
+      "time": "10:15",
+      "location": "East Perimeter",
+      "altitude_m": 32.0,
+      "description": "A motorcycle parked beside the east perimeter fence. No person is visible nearby.",
+      "expected": "log \u00e2\u20ac\u201d vehicle classification test"
+    },
+    {
+      "frame_id": 10,
+      "time": "11:30",
+      "location": "Employee Parking",
+      "altitude_m": 25.0,
+      "description": "Red Mahindra Bolero remains parked in employee parking. No suspicious movement detected.",
+      "expected": "log \u00e2\u20ac\u201d existing entity vehicle#1"
+    },
+    {
+      "frame_id": 11,
+      "time": "12:45",
+      "location": "Loading Dock",
+      "altitude_m": 24.0,
+      "description": "A blue cargo van reversing toward the loading dock. A worker is guiding the driver.",
+      "expected": "log \u00e2\u20ac\u201d new vehicle entity detection"
+    },
+    {
+      "frame_id": 12,
+      "time": "13:20",
+      "location": "Restricted Zone",
+      "altitude_m": 18.0,
+      "description": "A person walking past the restricted zone warning sign and approaching the access gate.",
+      "expected": "ALERT: restricted zone approach or intrusion, depending on boundary rules"
+    },
+    {
+      "frame_id": 13,
+      "time": "14:30",
+      "location": "Main Entrance",
+      "altitude_m": 29.0,
+      "description": "Red Mahindra Bolero exiting the facility through the main entrance.",
+      "expected": "log \u00e2\u20ac\u201d entity vehicle#1 exit_count=1"
+    },
+    {
+      "frame_id": 14,
+      "time": "16:00",
+      "location": "Employee Parking",
+      "altitude_m": 27.0,
+      "description": "Black Hyundai Creta parked in an authorized employee parking space.",
+      "expected": "log \u00e2\u20ac\u201d known vehicle category, no alert"
+    },
+    {
+      "frame_id": 15,
+      "time": "18:15",
+      "location": "Main Entrance",
+      "altitude_m": 30.0,
+      "description": "The same red Mahindra Bolero entering the facility again after previously exiting.",
+      "expected": "ALERT: repeated vehicle entry \u00e2\u20ac\u201d vehicle#1 entry_count=2"
+    },
+    {
+      "frame_id": 16,
+      "time": "19:30",
+      "location": "West Entrance",
+      "altitude_m": 17.0,
+      "description": "An unfamiliar grey SUV parked near the west entrance. Registration number cannot be identified.",
+      "expected": "log + INFO alert: unknown vehicle"
+    },
+    {
+      "frame_id": 17,
+      "time": "20:45",
+      "location": "South Perimeter",
+      "altitude_m": 14.0,
+      "description": "An individual climbing over the south perimeter fence and entering the facility.",
+      "expected": "ALERT: critical perimeter breach"
+    },
+    {
+      "frame_id": 18,
+      "time": "21:30",
+      "location": "Storage Yard",
+      "altitude_m": 16.0,
+      "description": "A person moving quickly between storage containers, repeatedly looking behind them.",
+      "expected": "ALERT: suspicious nighttime human activity"
+    },
+    {
+      "frame_id": 19,
+      "time": "23:00",
+      "location": "Loading Dock",
+      "altitude_m": 20.0,
+      "description": "Blue cargo van parked at the loading dock with its rear doors open. No workers or driver are visible.",
+      "expected": "ALERT: after-hours vehicle activity"
+    },
+    {
+      "frame_id": 20,
+      "time": "23:45",
+      "location": "Main Entrance",
+      "altitude_m": 19.0,
+      "description": "A stray dog walking across the main entrance driveway. No people or vehicles are nearby.",
+      "expected": "log \u00e2\u20ac\u201d animal detection, NO security alert (false-positive control); LOW BATTERY alert"
+    }
+  ]
+}
