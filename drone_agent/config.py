@@ -22,9 +22,19 @@ load_dotenv()
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]  # drone-security-agent/
 DATA_DIR = PROJECT_ROOT / "data"
-DB_PATH = Path(os.getenv("DB_PATH", str(PROJECT_ROOT / "drone_security.db")))
+
+# On read-only filesystems (e.g. Streamlit Cloud) fall back to /tmp
+def _writable_path(default: Path) -> Path:
+    try:
+        default.parent.mkdir(parents=True, exist_ok=True)
+        default.touch(exist_ok=True)
+        return default
+    except OSError:
+        return Path("/tmp") / default.name
+
+DB_PATH = _writable_path(Path(os.getenv("DB_PATH", str(PROJECT_ROOT / "drone_security.db"))))
 CHROMA_PATH = Path(os.getenv("CHROMA_PATH", str(PROJECT_ROOT / "chroma_db")))
-ALERTS_LOG_PATH = PROJECT_ROOT / "alerts.log"
+ALERTS_LOG_PATH = _writable_path(PROJECT_ROOT / "alerts.log")
 
 # ---------------------------------------------------------------------------
 # LLM provider

@@ -181,7 +181,12 @@ class VectorStore:
             raise RuntimeError("Run: pip install chromadb nomic")
         self._persist_path = str(persist_path)
         import chromadb as _chroma
-        self._client = _chroma.PersistentClient(path=str(persist_path))
+        try:
+            self._client = _chroma.PersistentClient(path=str(persist_path))
+        except Exception:
+            # Read-only filesystem (e.g. Streamlit Cloud) — fall back to in-memory store.
+            # The index rebuilds each session; all queries still work.
+            self._client = _chroma.EphemeralClient()
         self._col = self._client.get_or_create_collection(
             "drone_frames", metadata={"hnsw:space": "cosine"})
 
