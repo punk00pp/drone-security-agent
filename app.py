@@ -32,8 +32,8 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-from drone_agent.config import DATA_DIR, DB_PATH, CHROMA_PATH
-from drone_agent.storage import SQLiteStore, SearchEngine
+from drone_agent.config import DATA_DIR, DB_PATH, CHROMA_PATH, DATABASE_URL
+from drone_agent.storage import make_store, SearchEngine
 from drone_agent.pipeline import ContextManager, AlertRulesEngine, run_pipeline
 from drone_agent.simulator import load_scenario
 from drone_agent.analyzer import RuleBasedAnalyzer, LLMAnalyzer
@@ -50,15 +50,15 @@ _SEV_EMOJI = {"critical": "🔴", "warning": "🟡", "info": "🔵"}
 def _init_state():
     """Initialise all session-state keys on first load."""
     if "sqlite" not in st.session_state:
-        sqlite = SQLiteStore(DB_PATH)
+        store = make_store(DATABASE_URL)
         vec = None
         try:
             from drone_agent.storage import VectorStore
             vec = VectorStore(CHROMA_PATH)
         except (RuntimeError, ImportError):
             pass
-        st.session_state.sqlite = sqlite
-        st.session_state.search = SearchEngine(sqlite, vec)
+        st.session_state.sqlite = store
+        st.session_state.search = SearchEngine(store, vec)
         st.session_state.has_vec = vec is not None
 
     if "context" not in st.session_state:
@@ -78,7 +78,12 @@ def _init_state():
         st.session_state.chat_messages = []  # full LangGraph messages list (includes tool calls)
 
     if "pipeline_ran" not in st.session_state:
-        st.session_state.pipeline_ran = False
+        # If the DB already has data from a previous run, treat it as ran —
+        # this is what makes Search, Alerts, Entities, Agent Chat work after a page refresh.
+        try:
+            st.session_state.pipeline_ran = st.session_state.sqlite.frame_count() > 0
+        except Exception:
+            st.session_state.pipeline_ran = False
 
 
 def _reset_pipeline():
@@ -129,8 +134,13 @@ def sidebar():
     # Status
     st.sidebar.markdown("---")
     if st.session_state.pipeline_ran:
-        n_frames = len(st.session_state.analyzed)
-        n_alerts = len(st.session_state.alerts)
+        # Always read counts from DB — in-memory lists are empty after a page refresh
+        try:
+            n_frames = st.session_state.sqlite.frame_count()
+            n_alerts = len(st.session_state.search.get_alerts())
+        except Exception:
+            n_frames = len(st.session_state.analyzed)
+            n_alerts = len(st.session_state.alerts)
         st.sidebar.success(f"✅ {n_frames} frames  ·  {n_alerts} alerts")
         vec_status = "✅ enabled" if st.session_state.has_vec else "⚠️ unavailable"
         st.sidebar.caption(f"Semantic search: {vec_status}")
@@ -230,24 +240,35 @@ def tab_pipeline(scenario_path, analyzer_choice):
     elif st.session_state.pipeline_ran:
         # Show summary of previous run
         st.subheader("Last run summary")
-        analyzed = st.session_state.analyzed
-        alerts = st.session_state.alerts
+
+        # After a page refresh, in-memory lists are empty — read from DB instead
+        db_frames = st.session_state.search.by_time("1970-01-01T00:00:00", "2099-12-31T23:59:59")
+        db_alerts = st.session_state.search.get_alerts()
+        analyzed = st.session_state.analyzed  # may be empty after refresh
 
         c1, c2, c3 = st.columns(3)
-        c1.metric("Frames processed", len(analyzed))
-        c2.metric("Alerts fired", len(alerts))
+        c1.metric("Frames processed", len(db_frames))
+        c2.metric("Alerts fired", len(db_alerts))
         c3.metric("Entities tracked", len(st.session_state.context._entities))
 
         st.markdown("### Frame log")
-        rows = []
-        for af in analyzed:
-            rows.append({
+        # Use DB rows when in-memory list is empty (after refresh)
+        if analyzed:
+            rows = [{
                 "Frame": af.frame.frame_id,
                 "Time": af.frame.timestamp.strftime("%H:%M"),
                 "Location": af.telemetry.location,
                 "Altitude (m)": af.telemetry.altitude_m,
                 "Summary": af.summary,
-            })
+            } for af in analyzed]
+        else:
+            rows = [{
+                "Frame": r["frame_id"],
+                "Time": r["timestamp"][11:16],
+                "Location": r["location"],
+                "Altitude (m)": r["altitude_m"],
+                "Summary": r["summary"],
+            } for r in db_frames]
         st.dataframe(rows, use_container_width=True, hide_index=True)
 
 

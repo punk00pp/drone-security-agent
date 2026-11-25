@@ -36,15 +36,15 @@ DB_PATH = _writable_path(Path(os.getenv("DB_PATH", str(PROJECT_ROOT / "drone_sec
 CHROMA_PATH = Path(os.getenv("CHROMA_PATH", str(PROJECT_ROOT / "chroma_db")))
 ALERTS_LOG_PATH = _writable_path(PROJECT_ROOT / "alerts.log")
 
+# PostgreSQL connection string — if set, PostgresStore is used instead of SQLiteStore.
+# Format: postgresql://user:password@host:port/dbname
+DATABASE_URL: str | None = os.getenv("DATABASE_URL")
 # ---------------------------------------------------------------------------
-# LLM provider
+# LLM
 # ---------------------------------------------------------------------------
 
-LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "anthropic").lower()
-# Model names per provider — override via .env
-LLM_MODELS: dict[str, str] = {
-    "openai": os.getenv("LLM_MODEL", "qwen/qwen3.8-27b"),
-}
+# API key for Groq (used by LLMAnalyzer and the agent via langchain-openai).
+# Read directly in analyzer.py via os.getenv('API_KEY').
 
 # ---------------------------------------------------------------------------
 # Default analyzer
