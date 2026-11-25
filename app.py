@@ -50,7 +50,18 @@ _SEV_EMOJI = {"critical": "🔴", "warning": "🟡", "info": "🔵"}
 def _init_state():
     """Initialise all session-state keys on first load."""
     if "sqlite" not in st.session_state:
-        store = make_store(DATABASE_URL)
+        # On page refresh, restore the latest run_id from the DB so the session
+        # reconnects to the previous run's data automatically.
+        restore_run_id = None
+        if DATABASE_URL:
+            try:
+                _probe = make_store(DATABASE_URL)
+                restore_run_id = _probe.get_latest_run_id()
+                _probe.close()
+            except Exception:
+                pass
+
+        store = make_store(DATABASE_URL, run_id=restore_run_id)
         vec = None
         try:
             from drone_agent.storage import VectorStore
@@ -87,7 +98,15 @@ def _init_state():
 
 
 def _reset_pipeline():
-    """Clear pipeline state so a new scenario can be run."""
+    """Clear this run's data and prepare a fresh run_id for the next run."""
+    try:
+        st.session_state.sqlite.clear()  # deletes only this run_id's rows
+    except Exception:
+        pass
+    # Assign a new run_id so the next pipeline run is fully isolated
+    import uuid as _uuid
+    new_run_id = str(_uuid.uuid4())
+    st.session_state.sqlite.run_id = new_run_id
     st.session_state.context = ContextManager()
     st.session_state.analyzed = []
     st.session_state.alerts = []
@@ -95,11 +114,6 @@ def _reset_pipeline():
     st.session_state.chat_history = []
     st.session_state.chat_messages = []
     st.session_state.pipeline_ran = False
-    # Clear DB contents over the existing connection — avoids Windows file-lock error
-    try:
-        st.session_state.sqlite.clear()
-    except Exception:
-        pass
 
 
 # ============================================================================
@@ -136,8 +150,8 @@ def sidebar():
     if st.session_state.pipeline_ran:
         # Always read counts from DB — in-memory lists are empty after a page refresh
         try:
-            n_frames = st.session_state.sqlite.frame_count()
-            n_alerts = len(st.session_state.search.get_alerts())
+            n_frames = st.session_state.search.frame_count_global()
+            n_alerts = len(st.session_state.search.get_alerts_global())
         except Exception:
             n_frames = len(st.session_state.analyzed)
             n_alerts = len(st.session_state.alerts)
@@ -172,7 +186,18 @@ def tab_pipeline(scenario_path, analyzer_choice):
 
         rules = AlertRulesEngine()
         sqlite = st.session_state.sqlite
-        sqlite.clear()  # wipe previous run so alerts don't accumulate on re-run
+        # Generate a fresh run_id for this pipeline run so it doesn't
+        # collide with previous runs (all scenarios use frame_id 1-20).
+        import uuid as _uuid
+        st.session_state.sqlite.run_id = str(_uuid.uuid4())
+        sqlite = st.session_state.sqlite
+        sqlite.register_run(
+            scenario=scenario_path.name,
+            analyzer=analyzer_choice,
+        )
+        # Reset context so previous run's rolling window and entity tracker
+        # don't bleed into this run's alert evaluation.
+        st.session_state.context = ContextManager()
         search = st.session_state.search
         ctx = st.session_state.context
 
@@ -243,11 +268,11 @@ def tab_pipeline(scenario_path, analyzer_choice):
 
         # After a page refresh, in-memory lists are empty — read from DB instead
         db_frames = st.session_state.search.by_time("1970-01-01T00:00:00", "2099-12-31T23:59:59")
-        db_alerts = st.session_state.search.get_alerts()
+        db_alerts = st.session_state.search.get_alerts_global()
         analyzed = st.session_state.analyzed  # may be empty after refresh
 
         c1, c2, c3 = st.columns(3)
-        c1.metric("Frames processed", len(db_frames))
+        c1.metric("Frames processed", st.session_state.search.frame_count_global())
         c2.metric("Alerts fired", len(db_alerts))
         c3.metric("Entities tracked", len(st.session_state.context._entities))
 
@@ -283,7 +308,7 @@ def tab_alerts():
         st.info("Run the pipeline first.")
         return
 
-    all_alerts = st.session_state.search.get_alerts()
+    all_alerts = st.session_state.search.get_alerts_global()
     if not all_alerts:
         st.success("No alerts were fired.")
         return
